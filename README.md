@@ -92,6 +92,72 @@ Opened GPO user profile settings and checked options related to roaming profiles
 
 ![Roaming user administrator access in GPO](<screenshots/2026-08-03/RoamingUserAdministratorAccessinGPO.png>)
 
+## 2026-09-22 - accounting access control lab
+
+This one was mostly access control practice. I made accounting users/groups, created a main accounting data folder with separate folders inside it, then worked on permissions, access based enumeration and auditing.
+
+Same lab password rules as before. Anything visible is just for the lab.
+
+### 1. Lab tasks
+
+The task list was clear: create Accounting users and groups, build the folder structure with the needed permissions, enable Access Based Enumeration so users do not see denied folders, and later map the shared folders.
+
+![Access control task list](<screenshots/Thelab'sTasks.png>)
+
+### 2. Batch user creation idea
+
+I used the same Excel/batch file idea again to generate `dsadd user` commands. This is faster than creating users one by one from the GUI, even if it still needs checking before running.
+
+![Batch file for user creation](<screenshots/BatchFileForUserCreation.png>)
+
+### 3. Saving the commands as a bat file
+
+Moved the commands into Notepad and saved them as a batch file. For this run I was working on Accounting users like `Acc01`, `Acc02`, etc under the `Accounting` OU.
+
+![Saving the file as bat](<screenshots/Sacingthefileasbat.png>)
+
+### 4. Running the batch file
+
+Ran the file from CMD. One user already existed, but the rest of the Accounting users were created successfully. Good reminder that bulk scripts still need to handle duplicates.
+
+![Running the file and seeing users created](<screenshots/Runningthefileandseeingtheuserscreated.png>)
+
+### 5. Creating the main data folder
+
+Created `Main-ACC-DATA` on the separate `E:` volume. Inside it I made three folders for separate access cases, not on the system volume.
+
+![Creating main ACC data folder](<screenshots/CreatingMainFileinsideit3fileseachforaseprateOU.png>)
+
+### 6. Adding the Accounting group
+
+In AD I had the Accounting users plus `ACC-Group-1`. I started adding the group to the folder permissions so access can be controlled by group membership instead of touching every user manually.
+
+![Setting Accounting group access](<screenshots/SettingACCountingGroup-1asthegrouptoaccessthefolder.png>)
+
+### 7. Access Based Enumeration
+
+Enabled Access Based Enumeration from Server Manager on the share. The point is simple: if a user has no permission to a folder, they should not even see it in the share.
+
+![Enabling access based enumeration](<screenshots/EnablingAccessenumerationintheservermanager.png>)
+
+### 8. Per-folder permissions
+
+For the folders inside `Main-ACC-DATA`, I disabled inheritance and gave access only to the user/group that should use that folder. Example here is `Acc03` getting access to `Cleint_document`.
+
+![Per-folder access control](<screenshots/Foreachfolderinsidethemainfolderiseteachusertoonefolderwherehecanonlyaccessthedesiredfolderthroughdisablinginheretinceandchaningthepermissionsandaccesscontrol.png>)
+
+### 9. Auditing on the folder
+
+Enabled auditing on `Main-ACC-DATA` for `ACC-Group-1`, mainly for read/execute access. This was to see file access events later in Event Viewer.
+
+![Enabled auditing for file access](<screenshots/EnabledAuditingforfileacdessandseeingitineventviewer.png>)
+
+### 10. Event Viewer check
+
+Checked the Security log in Event Viewer and saw file system auditing events like `4656`. This confirms that the audit policy/folder auditing side is producing logs.
+
+![Event viewer for file operations](<screenshots/Eventviewerforseeingfileoperations.png>)
+
 ## Next things to add
 
 - DNS and DHCP notes
