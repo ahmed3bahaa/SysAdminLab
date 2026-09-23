@@ -92,71 +92,203 @@ Opened GPO user profile settings and checked options related to roaming profiles
 
 ![Roaming user administrator access in GPO](<screenshots/2026-08-03/RoamingUserAdministratorAccessinGPO.png>)
 
-## 2026-09-22 - accounting access control lab
+## 2026-09-23 - storage, FSRM and iSCSI lab
 
-This one was mostly access control practice. I made accounting users/groups, created a main accounting data folder with separate folders inside it, then worked on permissions, access based enumeration and auditing.
+This day was mostly storage work. I went through basic disks, dynamic disks, Storage Spaces, VHDs, deduplication, FSRM quotas/reports and a small iSCSI target test between the lab servers.
 
-Same lab password rules as before. Anything visible is just for the lab.
+Some names are rough because I saved the screenshots while doing the lab.
 
-### 1. Lab tasks
+### 1. Basic disk allocation
 
-The task list was clear: create Accounting users and groups, build the folder structure with the needed permissions, enable Access Based Enumeration so users do not see denied folders, and later map the shared folders.
+Started with a normal simple volume and assigned a drive letter from Disk Management. This is the basic path before getting into dynamic disk types.
 
-![Access control task list](<screenshots/Thelab'sTasks.png>)
+![Basic disk allocation](<screenshots/2026-09-23/BasicDiskAllocation.png>)
 
-### 2. Batch user creation idea
+### 2. Disk check
 
-I used the same Excel/batch file idea again to generate `dsadd user` commands. This is faster than creating users one by one from the GUI, even if it still needs checking before running.
+Ran `chkdsk e: /F` and watched the stages. I also saw the usual message when a volume is busy, so I tried it against a volume that could be checked.
 
-![Batch file for user creation](<screenshots/BatchFileForUserCreation.png>)
+![Disk check and configuring](<screenshots/2026-09-23/DiskCheckandconfigureingand extending.png>)
 
-### 3. Saving the commands as a bat file
+### 3. DiskPart format and logical partition
 
-Moved the commands into Notepad and saved them as a batch file. For this run I was working on Accounting users like `Acc01`, `Acc02`, etc under the `Accounting` OU.
+Used DiskPart to format, mark active, create an extended partition, create a logical partition, assign a letter, and then clean the disk after testing.
 
-![Saving the file as bat](<screenshots/Sacingthefileasbat.png>)
+![DiskPart formatting and logical partition](<screenshots/2026-09-23/CreatingFomrattingAssigningtothebasicdisckLogicalandprimarystorage.png>)
 
-### 4. Running the batch file
+### 4. Striped volume
 
-Ran the file from CMD. One user already existed, but the rest of the Accounting users were created successfully. Good reminder that bulk scripts still need to handle duplicates.
+Created a striped volume across dynamic disks. Main note here is that it can improve spread/performance, but it is not the one to pick if I need easy extending or redundancy.
 
-![Running the file and seeing users created](<screenshots/Runningthefileandseeingtheuserscreated.png>)
+![Striped disk](<screenshots/2026-09-23/StrippedDiskThatCannotbeExtended.png>)
 
-### 5. Creating the main data folder
+### 5. Spanned volume
 
-Created `Main-ACC-DATA` on the separate `E:` volume. Inside it I made three folders for separate access cases, not on the system volume.
+Created a spanned volume and saw how it can use space from more than one disk. This is more flexible than striped for adding space, but still not redundancy.
 
-![Creating main ACC data folder](<screenshots/CreatingMainFileinsideit3fileseachforaseprateOU.png>)
+![Spanned disk](<screenshots/2026-09-23/SpannedDiskthatcanbeadjustedeasily.png>)
 
-### 6. Adding the Accounting group
+### 6. Mirrored volume
 
-In AD I had the Accounting users plus `ACC-Group-1`. I started adding the group to the folder permissions so access can be controlled by group membership instead of touching every user manually.
+Created a mirrored volume using two disks. This one is for keeping a duplicate copy, so if one side fails there is still another copy.
 
-![Setting Accounting group access](<screenshots/SettingACCountingGroup-1asthegrouptoaccessthefolder.png>)
+![Mirrored disk](<screenshots/2026-09-23/MirrorDiskThatDuplicateforPersistance.png>)
 
-### 7. Access Based Enumeration
+### 7. Breaking the mirror
 
-Enabled Access Based Enumeration from Server Manager on the share. The point is simple: if a user has no permission to a folder, they should not even see it in the share.
+Broke the mirror and Windows assigned different letters to the two sides. Good to see what happens after separating a mirrored volume.
 
-![Enabling access based enumeration](<screenshots/EnablingAccessenumerationintheservermanager.png>)
+![Breaking mirror disk](<screenshots/2026-09-23/BreakingthemirriorDiskAssiginsdifferentLetters.png>)
 
-### 8. Per-folder permissions
+### 8. RAID-5 volume
 
-For the folders inside `Main-ACC-DATA`, I disabled inheritance and gave access only to the user/group that should use that folder. Example here is `Acc03` getting access to `Cleint_document`.
+Created a RAID-5 volume using three disks, with one part acting for parity. I wanted to see how it looks in Disk Management compared with mirror and spanned.
 
-![Per-folder access control](<screenshots/Foreachfolderinsidethemainfolderiseteachusertoonefolderwherehecanonlyaccessthedesiredfolderthroughdisablinginheretinceandchaningthepermissionsandaccesscontrol.png>)
+![RAID 5 volume](<screenshots/2026-09-23/RAID5Thatmustuses3diskoneforparity.png>)
 
-### 9. Auditing on the folder
+### 9. Storage pool creation
 
-Enabled auditing on `Main-ACC-DATA` for `ACC-Group-1`, mainly for read/execute access. This was to see file access events later in Event Viewer.
+Moved to Server Manager and selected physical disks for a new storage pool. This is the Storage Spaces way instead of just using Disk Management.
 
-![Enabled auditing for file access](<screenshots/EnabledAuditingforfileacdessandseeingitineventviewer.png>)
+![Storage pool creation](<screenshots/2026-09-23/Storagepoollinkscreation.png>)
 
-### 10. Event Viewer check
+### 10. Virtual disk from the pool
 
-Checked the Security log in Event Viewer and saw file system auditing events like `4656`. This confirms that the audit policy/folder auditing side is producing logs.
+Created a virtual disk from the pool and picked NTFS during the new volume wizard.
 
-![Event viewer for file operations](<screenshots/Eventviewerforseeingfileoperations.png>)
+![Virtual disk creation](<screenshots/2026-09-23/ThenAfteritVirtualDiskCreation.png>)
+
+### 11. New physical disks added
+
+Added two new physical disks and rescanned the server. The storage pool view showed the new disks and the existing virtual disks.
+
+![Adding physical disks and rescanning](<screenshots/2026-09-23/Addiningtwonewphysicaldiskandrescaningtheserver.png>)
+
+### 12. Disk visible in This PC
+
+Checked from File Explorer and the disk pool showed as a normal drive. I like checking both Server Manager and Explorer so I know it is actually usable.
+
+![Disk drive visible](<screenshots/2026-09-23/HerewecanseethediskDrive.png>)
+
+### 13. Extending storage
+
+Extended the storage setup and added another virtual disk. The pool had one simple virtual disk and another mirrored virtual disk.
+
+![Extending disk and adding volumes](<screenshots/2026-09-23/ExtendingtheDiskandaddingnewvolumes.png>)
+
+### 14. Hard link
+
+Tested hard links with `mklink /H`. First attempt failed because the source file did not exist, then I created the file and the hard link worked.
+
+![Hard link creation](<screenshots/2026-09-23/HardLinkCreation.png>)
+
+### 15. Junction link
+
+Created a junction with `mklink /J` from the Pictures path to another folder on `E:`. This is useful to understand how folder redirection-style links behave.
+
+![Junction link creation](<screenshots/2026-09-23/JunctionLinkOrSoftlinkCreation.png>)
+
+### 16. VHD creation and attach
+
+Created a dynamic VHDX from Disk Management. I used `G:\vdsk1.vhdx` and picked dynamically expanding.
+
+![VHD creation and attaching](<screenshots/2026-09-23/VHDCreation&Attaching.png>)
+
+### 17. VHD isolation
+
+After attaching the VHD, it showed as its own disk/volume. This helped show how a VHD can be mounted and treated like a separate disk.
+
+![VHD isolation](<screenshots/2026-09-23/VHDIsolation.png>)
+
+### 18. Growing a dynamic VHD
+
+The trick was to mount the VHD, fill it with data until it is forced to grow, then eject it. Good practical way to see dynamic growth instead of only reading about it.
+
+![VHD growth trick](<screenshots/2026-09-23/AtricktoincreaseVHDistomountthenfillitdatauntilitisforcedtogetbiggertheneject.png>)
+
+### 19. Dedup evaluation
+
+Ran `ddpeval G:` to estimate dedup savings. It showed high savings, so this volume was a good example for dedup testing.
+
+![Dedup evaluation install](<screenshots/2026-09-23/dedupevalutioninstall.png>)
+
+### 20. Dedup schedule
+
+Configured dedup scheduling in Server Manager. I used background optimization and played with the schedule times.
+
+![Dedup scheduling](<screenshots/2026-09-23/dedupscheduling.png>)
+
+### 21. Dedup job from PowerShell
+
+Started a dedup job from PowerShell. I made a typo first with the type name, then corrected it to `Optimization`.
+
+![Dedup job using CMD](<screenshots/2026-09-23/DedupjobusingCMD.png>)
+
+### 22. Dedup result
+
+Checked Server Manager and saw a deduplication rate of `84%` with about `2.79 GB` saved. This was the proof that dedup actually did something.
+
+![Deduplication rate](<screenshots/2026-09-23/DeduplicationRateis84%.png>)
+
+### 23. FSRM task list
+
+Reviewed the FSRM tasks: install FSRM, create quotas, file screening and reports. This was the checklist before doing the actual FSRM work.
+
+![FSRM tasks](<screenshots/2026-09-23/FSRMTasks.png>)
+
+### 24. FSRM installed
+
+Confirmed FSRM was installed because the classification tab and quota management options were visible.
+
+![FSRM installation seen](<screenshots/2026-09-23/FSRMinstallationseencauseoftheclassificationtabplusquotamanagmentonspecificfile.png>)
+
+### 25. Quota settings
+
+Tested quota settings. I used a hard quota instead of only monitoring, so users cannot exceed the configured limit.
+
+![Quota properties](<screenshots/2026-09-23/Quotapropslimiteventviewerandhardquotainsteadofmontiorthroughsoft.png>)
+
+### 26. Quota event in Event Viewer
+
+Generated a quota warning and saw Event Viewer report that the user passed the `85%` threshold. This confirms the alerting side works.
+
+![Quota event viewer test](<screenshots/2026-09-23/herewecanseethetestiranwithquotaexceeding85%seenineventviewr.png>)
+
+### 27. FSRM report
+
+Opened the file screening audit report in the browser. This report path is useful when checking file screening or storage policy violations.
+
+![FSRM auditing report](<screenshots/2026-09-23/FSRMAuditingreport.png>)
+
+### 28. iSCSI Target Server install
+
+Installed the iSCSI Target Server role from Add Roles and Features.
+
+![iSCSI installation](<screenshots/2026-09-23/IscsiInstallation.png>)
+
+### 29. Assign iSCSI target
+
+Created a new iSCSI virtual disk and assigned it to a new target.
+
+![iSCSI target assigning](<screenshots/2026-09-23/ISCSITargetAssiging.png>)
+
+### 30. Connect target with IQN
+
+Connected the target from the other server using the initiator/IQN path. This is where the target side and initiator side start matching.
+
+![Connecting iSCSI target](<screenshots/2026-09-23/ConnectingtheTargetIscsitotheServerthroughIQN.png>)
+
+### 31. iSCSI disk appears in Disk Management
+
+On the client/server side, the iSCSI disk appeared in Disk Management as a normal disk that could be initialized and formatted.
+
+![iSCSI reflected in disk management](<screenshots/2026-09-23/TheISCSICREATEDontheTargetisinstantlyreflectedwhenrunningdiskmgmt.msc.png>)
+
+### 32. Connect and disconnect steps
+
+Checked the iSCSI Initiator window and saw the discovered target connected. This is also where I can disconnect it again when testing.
+
+![iSCSI connect disconnect steps](<screenshots/2026-09-23/Stepsofconnecting-disconnectingtheISCITarget.png>)
 
 ## Next things to add
 
