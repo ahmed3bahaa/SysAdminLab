@@ -2,13 +2,13 @@
 
 ## Objective
 
-Practice Windows Server storage and file services tasks, including SMB/NTFS permissions, mapped folders, dynamic disks, Storage Spaces, VHD/VHDX, Data Deduplication, FSRM quotas/reports, and iSCSI.
+Practice Windows Server storage and file services tasks, including SMB/NTFS permissions, mapped folders, dynamic disks, Storage Spaces, VHD/VHDX, Data Deduplication, FSRM quotas/reports, iSCSI, and Storage Replica.
 
 ## Lab Environment
 
 - VMware-based Windows Server lab.
 - Domain evidence from related labs: `Ahmed.Edu`.
-- Tools used: Disk Management, Server Manager, File Explorer, PowerShell, Command Prompt, File Server Resource Manager, Event Viewer, iSCSI Target Server, and iSCSI Initiator.
+- Tools used: Disk Management, Server Manager, File Explorer, PowerShell, Command Prompt, File Server Resource Manager, Event Viewer, iSCSI Target Server, iSCSI Initiator, and Storage Replica.
 
 ## Lab 1: File Shares, Permissions, and User Data - 2026-08-03
 
@@ -314,3 +314,71 @@ This lab demonstrates practical storage administration across Windows Disk Manag
 - Add a clean table comparing simple, spanned, striped, mirrored, RAID-5, and Storage Spaces virtual disks.
 - Add iSCSI target IP/DNS details if they are intended to be public lab documentation.
 - Add exported FSRM quota/report configuration if available.
+
+## Lab 3: Storage Replica Prep and Script
+
+Dates: 2026-09-27 to 2026-09-30.
+
+### Objective
+
+Practice preparing two Windows Server VMs for Storage Replica and write the PowerShell steps for a source/destination replication setup.
+
+### Implementation
+
+#### Disk prep on both servers
+
+I added two disks across the servers and brought them online/initialized them from Server Manager. This was the storage prep before creating the data and log volumes.
+
+![Disks online and initialized](<screenshots/2026-09-27/CreatedTwoHDDintwoserversandbroughtthemonlineandinitlaizedthem.png>)
+
+#### Data and log volumes
+
+On the source VM I created the volumes for the Storage Replica test. The screenshot shows `replication (R:)` and `Log (L:)`, which matches the script variables used later.
+
+![Storage Replica data and log volumes](<screenshots/2026-09-30/IntheSourceVMCreatedthestoragereplicavolumeandlogvolumeasshown.png>)
+
+#### Storage Replica script draft
+
+I wrote a PowerShell script for the Storage Replica setup. The visible script uses `S2` as the source server and `S3` as the destination server, with `R:` for the data volume and `L:` for the log volume.
+
+The script also includes feature installation, `Test-SRTopology`, and `New-SRPartnership`.
+
+![Storage Replica script draft](<screenshots/2026-09-30/StorageReplicaScriptfirstfileserverandstoragereplicaandvolumescreationorinstalltionandtestingthem.png>)
+
+### Commands and Scripts
+
+Commands visible in the screenshot include:
+
+```powershell
+Install-WindowsFeature -Name Storage-Replica,FS-FileServer -IncludeManagementTools
+Install-WindowsFeature -ComputerName $DestinationServer -Name Storage-Replica,FS-FileServer -IncludeManagementTools
+Test-SRTopology
+New-SRPartnership
+```
+
+The actual `.ps1` file is not committed yet. Right now the script is documented from the screenshot.
+
+### Verification and Testing
+
+- Server Manager showed the disks online and initialized.
+- File Explorer showed the Storage Replica data and log volumes.
+- The script includes `Test-SRTopology` before creating the replication partnership.
+
+I do not have a screenshot yet showing the final replication health/status after `New-SRPartnership`, so I am not claiming the full replication test is finished.
+
+### Results
+
+The lab shows the prep work and PowerShell plan for a Storage Replica setup between `S2` and `S3`.
+
+### Lessons Learned
+
+- Storage Replica needs separate data and log volumes.
+- It is better to test the topology before creating the partnership.
+- Screenshots are useful for notes, but the actual `.ps1` script and final status output should be committed later.
+
+### Documentation TODO
+
+- Add the real `StorageReplica.ps1` file.
+- Add `Test-SRTopology` report output.
+- Add `Get-SRGroup` / `Get-SRPartnership` output after the partnership is created.
+- Add a small diagram showing source, destination, data volume, and log volume.

@@ -11,9 +11,11 @@ This file documents only details that are visible in the current repository evid
 ## Domain and Hosts
 
 - Active Directory domain visible in screenshots: `Ahmed.Edu`.
-- Server names visible in screenshots include `S1` and `S1.Ahmed.Edu`.
+- Server names visible in screenshots include `S1`, `S1.Ahmed.Edu`, `S2`, and `S3`.
 - Multiple VMs are visible in VMware tabs, including `S1`, `S2`, and `S3`.
 - A Windows client/domain login test is shown with `whoami` and `whoami /user`.
+- NLB evidence shows cluster name `NLB.Ahmed.edu` with cluster IP `10.0.0.100`.
+- NLB node IPs visible in the script/screenshots are `10.0.0.2` for `S2` and `10.0.0.3` for `S3`.
 
 ## Technologies Practiced
 
@@ -26,8 +28,12 @@ This file documents only details that are visible in the current repository evid
 - Data Deduplication.
 - File Server Resource Manager.
 - iSCSI Target Server and iSCSI Initiator.
+- Storage Replica.
+- IIS / Web Server role.
+- Network Load Balancing.
+- PowerShell Desired State Configuration.
 - Event Viewer.
-- Command-line tools including `whoami`, `dsadd`, `chkdsk`, `diskpart`, `mklink`, and deduplication PowerShell cmdlets.
+- Command-line tools including `whoami`, `dsadd`, `chkdsk`, `diskpart`, `mklink`, `Install-WindowsFeature`, and Windows Server PowerShell cmdlets.
 
 ## Documentation TODO
 

@@ -17,8 +17,8 @@ Confirmed from screenshots:
 - VMware Workstation virtual machines.
 - Windows Server 2022 Standard Evaluation appears in the lab screenshots.
 - Domain-related work in `Ahmed.Edu`.
-- Server names including `S1` and `S1.Ahmed.Edu`.
-- File and storage services, iSCSI, FSRM, Storage Spaces, and Event Viewer testing.
+- Server names including `S1`, `S1.Ahmed.Edu`, `S2`, and `S3`.
+- File and storage services, iSCSI, FSRM, Storage Spaces, Storage Replica, IIS, NLB, DSC, and Event Viewer testing.
 
 Detailed environment notes are in [docs/lab-environment.md](docs/lab-environment.md).
 
@@ -35,7 +35,10 @@ Detailed environment notes are in [docs/lab-environment.md](docs/lab-environment
 | Data Deduplication | Evaluated dedup savings, scheduled deduplication, and ran a dedup job from PowerShell | [Storage and File Services](04-Storage-File-Services/README.md) |
 | FSRM | Installed/used FSRM features, tested quotas, event logging, and reports | [Storage and File Services](04-Storage-File-Services/README.md) |
 | iSCSI | Installed iSCSI Target Server, created a virtual disk target, and connected from an initiator | [Storage and File Services](04-Storage-File-Services/README.md) |
-| Command-line administration | Used tools such as `whoami`, `dsadd`, `chkdsk`, `diskpart`, `mklink`, and deduplication PowerShell cmdlets | [PowerShell and Automation](05-PowerShell-Automation/README.md) |
+| Storage Replica | Prepared data/log volumes and drafted PowerShell for topology testing and replication partnership setup | [Storage and File Services](04-Storage-File-Services/README.md#lab-3-storage-replica-prep-and-script) |
+| IIS / Network Load Balancing | Installed IIS/NLB, created an NLB cluster, configured HTTP port rules, and added two web nodes | [Network Load Balancing and IIS](08-Network-Load-Balancing-IIS/README.md) |
+| PowerShell DSC | Drafted Local Configuration Manager push settings and IIS desired state configuration | [PowerShell and Automation](05-PowerShell-Automation/README.md#lab-desired-state-configuration-for-iis) |
+| Command-line administration | Used tools such as `whoami`, `dsadd`, `chkdsk`, `diskpart`, `mklink`, `Install-WindowsFeature`, and Windows Server PowerShell cmdlets | [PowerShell and Automation](05-PowerShell-Automation/README.md) |
 | Troubleshooting / Verification | Used Event Viewer, command output, Disk Management, and Server Manager to verify results | [Monitoring and Troubleshooting](07-Monitoring-Troubleshooting/README.md) |
 | Virtualization | Configured VMware virtual networking for the lab | [Virtualization](06-Virtualization/README.md) |
 
@@ -46,9 +49,10 @@ Detailed environment notes are in [docs/lab-environment.md](docs/lab-environment
 | [01-Active-Directory](01-Active-Directory/README.md) | OU/user work, domain session checks, and bulk user command preparation. |
 | [02-Group-Policy](02-Group-Policy/README.md) | Roaming profile and User Profiles policy practice. |
 | [04-Storage-File-Services](04-Storage-File-Services/README.md) | Shares, NTFS permissions, dynamic disks, Storage Spaces, VHDs, deduplication, FSRM, and iSCSI. |
-| [05-PowerShell-Automation](05-PowerShell-Automation/README.md) | Command-line and automation evidence currently captured in screenshots. |
+| [05-PowerShell-Automation](05-PowerShell-Automation/README.md) | Command-line work, DSC notes, and automation evidence currently captured in screenshots. |
 | [06-Virtualization](06-Virtualization/README.md) | VMware lab networking setup. |
 | [07-Monitoring-Troubleshooting](07-Monitoring-Troubleshooting/README.md) | Verification and troubleshooting notes from the labs. |
+| [08-Network-Load-Balancing-IIS](08-Network-Load-Balancing-IIS/README.md) | IIS and Windows Network Load Balancing between two server nodes. |
 
 ## PowerShell Scripts
 
@@ -62,6 +66,9 @@ The repository does include screenshots showing command-based work and script co
 - `mklink /H` hard link creation.
 - `mklink /J` junction creation.
 - `ddpeval`, `Start-DedupJob`, and `Get-DedupJob` for deduplication testing.
+- `Install-WindowsFeature` for IIS, NLB, Storage Replica, and File Server features.
+- DSC Local Configuration Manager and IIS desired state configuration work.
+- Storage Replica topology and partnership commands.
 
 Details are tracked in [05-PowerShell-Automation](05-PowerShell-Automation/README.md). A current documentation TODO is to add the actual reusable scripts used during the lab.
 
@@ -74,6 +81,8 @@ Documented troubleshooting examples include:
 - A deduplication PowerShell command failed due to an invalid job type typo, then worked after using `Optimization`.
 - FSRM quota threshold events were verified in Event Viewer.
 - iSCSI target connection was verified by checking that the remote disk appeared in Disk Management.
+- NLB host membership was checked in Network Load Balancing Manager.
+- Storage Replica setup was started with disk/volume prep and a PowerShell topology/partnership script.
 
 More detail is in [07-Monitoring-Troubleshooting](07-Monitoring-Troubleshooting/README.md).
 

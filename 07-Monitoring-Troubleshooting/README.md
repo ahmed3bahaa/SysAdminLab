@@ -36,12 +36,25 @@ The iSCSI target was checked from the initiator side and the disk appeared in Di
 
 Evidence: [iSCSI disk appears in Disk Management](../04-Storage-File-Services/README.md#31-iscsi-disk-in-disk-management)
 
+### NLB convergence check
+
+The NLB lab shows `S2` and `S3` added under the same cluster. One node is still converging in the screenshot, which is useful because it shows why the cluster state should be checked after changes.
+
+Evidence: [NLB nodes added](../08-Network-Load-Balancing-IIS/README.md#add-both-servers-to-the-cluster)
+
+### Storage Replica pre-checks
+
+The Storage Replica script includes `Test-SRTopology` before creating the partnership. I still need to add the actual report/output, but the script structure shows the right idea: test the topology before assuming replication will work.
+
+Evidence: [Storage Replica script draft](../04-Storage-File-Services/README.md#storage-replica-script-draft)
+
 ## Lessons Learned
 
 - GUI configuration should be verified with a second tool when possible.
 - Event Viewer is useful for confirming FSRM and auditing behavior.
 - Command errors are worth documenting because they show how the fix was found.
 - Storage configuration is easier to trust after checking Disk Management, Server Manager, and File Explorer.
+- Cluster and replication work needs status/output screenshots, not just setup screenshots.
 
 ## Documentation TODO
 
